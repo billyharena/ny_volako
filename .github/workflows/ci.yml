@@ -29,3 +29,29 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+  database-auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec supabase start --exclude realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor > /dev/null
+      - run: pnpm exec supabase db reset --local --yes
+      - run: pnpm test:db
+      - run: pnpm exec supabase db lint --local --fail-on warning
+      - run: pnpm exec supabase db advisors --local --type security --level warn --fail-on warn
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e:local
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: auth-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

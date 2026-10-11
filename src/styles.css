@@ -106,3 +106,14 @@ footer { max-width: 1200px; padding: 5px 48px 28px; margin: 0 auto; font-size: 1
   .settings-card { padding: 22px; }
   .settings-list > div { font-size: 12px; }
 }
+/* Authentification : champs explicites et cibles confortables au clavier/mobile. */
+.auth-card { max-width: 640px; }
+.account-email { overflow-wrap: anywhere; }
+.auth-form { display: grid; gap: 1.25rem; }
+.auth-form label { display: grid; gap: .5rem; font-weight: 600; }
+.auth-form input { width: 100%; min-height: 48px; padding: .75rem; border: 1px solid #a9b5a8; border-radius: .6rem; background: white; color: #213f32; font: inherit; }
+.auth-form input:focus-visible { outline: 3px solid #76a487; outline-offset: 2px; }
+.auth-links { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
+.field-hint { font-weight: 400; font-size: .875rem; }
+button.primary-link { border: 0; cursor: pointer; font: inherit; }
+button:disabled { opacity: .65; cursor: wait; }

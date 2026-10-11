@@ -1,6 +1,8 @@
 import { ArrowUpRight, Check, Circle, Compass, Layers3, Settings2, Wallet } from 'lucide-react'
 import { NavLink, Route, Routes, Link } from 'react-router'
 import { readEnvironment } from '../config/environment'
+import { AuthPage } from '../features/auth/AuthPage'
+import { AccountPage } from '../features/auth/AccountPage'
 
 const environment = readEnvironment(import.meta.env)
 
@@ -17,6 +19,7 @@ export function App() {
         <nav aria-label="Navigation principale">
           <NavLink to="/" end><Compass size={20} aria-hidden="true" />Accueil</NavLink>
           <NavLink to="/configuration"><Settings2 size={20} aria-hidden="true" />Configuration</NavLink>
+          <NavLink to="/compte"><Wallet size={20} aria-hidden="true" />Mon compte</NavLink>
         </nav>
         <div className="sidebar-note">
           <span className="small-dot" />Un projet qui prend forme
@@ -32,6 +35,11 @@ export function App() {
           <Routes>
             <Route path="/" element={<Welcome />} />
             <Route path="/configuration" element={<Configuration />} />
+            <Route path="/connexion" element={<AuthPage key="login" mode="login" />} />
+            <Route path="/inscription" element={<AuthPage key="register" mode="register" />} />
+            <Route path="/mot-de-passe-oublie" element={<AuthPage key="reset" mode="reset" />} />
+            <Route path="/recuperation" element={<AuthPage key="recover" mode="recover" />} />
+            <Route path="/compte" element={<AccountPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
@@ -53,7 +61,8 @@ function Welcome() {
         <div className="hero-content">
           <span className="pill"><Layers3 size={15} aria-hidden="true" />Les fondations</span>
           <h2 id="hero-title">Votre espace<br />se prépare.</h2>
-          <p>Ny Volako se construit étape par étape. Le socle est en place ; la connexion à votre compte sera la prochaine étape.</p>
+          <p>Ny Volako se construit étape par étape. Vous pouvez maintenant créer votre compte et préparer votre espace personnel.</p>
+          <Link to="/compte" className="primary-link">Ouvrir mon compte<ArrowUpRight size={18} aria-hidden="true" /></Link>
           <Link to="/configuration" className="primary-link">Voir la configuration<ArrowUpRight size={18} aria-hidden="true" /></Link>
         </div>
         <div className="hero-art" aria-hidden="true">
@@ -68,7 +77,7 @@ function Welcome() {
         </div>
       </section>
       <section className="progress-section" aria-labelledby="steps-title">
-        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 2 sur 7</span></div>
+        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 3 sur 7</span></div>
         <div className="step-grid">
           <Step number="01" title="Poser les bases" text="L’architecture est validée. L’application et ses outils de vérification sont initialisés." current />
           <Step number="02" title="Connecter votre compte" text="Une connexion personnelle et des accès protégés à vos données." />
@@ -101,11 +110,11 @@ function Configuration() {
         <span className="setting-icon"><Settings2 size={24} aria-hidden="true" /></span>
         <h2 id="connection-title">Connexion au compte</h2>
         <p role="status">{environment.message}</p>
-        <p>La connexion et la synchronisation ne sont pas encore activées dans cette version.</p>
+        <p>La connexion nécessite un serveur Supabase configuré. La synchronisation hors ligne sera ajoutée à la phase 5.</p>
         <dl className="settings-list">
           <div><dt>Langue de l’interface</dt><dd>Français</dd></div>
           <div><dt>Devise prévue par défaut</dt><dd>Ariary · MGA</dd></div>
-          <div><dt>État du projet</dt><dd>Initialisation · Phase 2</dd></div>
+          <div><dt>État du projet</dt><dd>Base et authentification · Phase 3</dd></div>
         </dl>
       </section>
     </>

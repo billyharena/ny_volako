@@ -17,6 +17,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:db": "supabase test db --local",
+    "test:e2e:local": "node scripts/test-local-auth.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },
   "dependencies": {
@@ -47,6 +49,7 @@
     "fake-indexeddb": "6.2.5",
     "globals": "17.13.0",
     "jsdom": "30.1.2",
+    "supabase": "2.120.0",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.1",
