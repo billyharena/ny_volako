@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.pnpm-store/
+.env
+.env.*
+!.env.example
+.vercel/
+supabase/.temp/
+*.local
+*.tsbuildinfo
+.DS_Store
