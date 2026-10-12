@@ -3,10 +3,17 @@ import { NavLink, Route, Routes, Link } from 'react-router'
 import { readEnvironment } from '../config/environment'
 import { AuthPage } from '../features/auth/AuthPage'
 import { AccountPage } from '../features/auth/AccountPage'
+import { useAuth } from '../features/auth/context'
+import { PrivateWorkspace } from '../features/finance/PrivateWorkspace'
+import { Dashboard } from '../features/finance/Dashboard'
+import { ExpenseEditor, ExpenseHistory } from '../features/finance/Expenses'
+import { Categories } from '../features/finance/Categories'
+import { Budgets } from '../features/finance/Budgets'
 
 const environment = readEnvironment(import.meta.env)
 
 export function App() {
+  const { session } = useAuth()
   return (
     <div className="app-layout">
       <a className="skip-link" href="#main">Aller au contenu</a>
@@ -17,8 +24,8 @@ export function App() {
         </Link>
         <p className="nav-heading">VOTRE ESPACE</p>
         <nav aria-label="Navigation principale">
-          <NavLink to="/" end><Compass size={20} aria-hidden="true" />Accueil</NavLink>
-          <NavLink to="/configuration"><Settings2 size={20} aria-hidden="true" />Configuration</NavLink>
+          <NavLink to={session ? '/tableau-de-bord' : '/'} end><Compass size={20} aria-hidden="true" />Accueil</NavLink>
+          {session ? <><NavLink to="/depenses"><Layers3 size={20} aria-hidden="true" />Dépenses</NavLink><NavLink to="/budgets"><Settings2 size={20} aria-hidden="true" />Budget</NavLink></> : <NavLink to="/configuration"><Settings2 size={20} aria-hidden="true" />Configuration</NavLink>}
           <NavLink to="/compte"><Wallet size={20} aria-hidden="true" />Mon compte</NavLink>
         </nav>
         <div className="sidebar-note">
@@ -39,7 +46,15 @@ export function App() {
             <Route path="/inscription" element={<AuthPage key="register" mode="register" />} />
             <Route path="/mot-de-passe-oublie" element={<AuthPage key="reset" mode="reset" />} />
             <Route path="/recuperation" element={<AuthPage key="recover" mode="recover" />} />
-            <Route path="/compte" element={<AccountPage />} />
+            <Route element={<PrivateWorkspace />}>
+              <Route path="/compte" element={<AccountPage />} />
+              <Route path="/tableau-de-bord" element={<Dashboard />} />
+              <Route path="/depenses" element={<ExpenseHistory />} />
+              <Route path="/depenses/nouvelle" element={<ExpenseEditor />} />
+              <Route path="/depenses/:id" element={<ExpenseEditor />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/budgets" element={<Budgets />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
@@ -55,13 +70,13 @@ function Welcome() {
       <div className="page-heading">
         <p className="eyebrow">BIENVENUE CHEZ VOUS</p>
         <h1>Un peu plus de clarté,<br />chaque jour.</h1>
-        <p>Votre futur carnet pour suivre vos dépenses et avancer à votre rythme.</p>
+        <p>Votre carnet pour suivre vos dépenses et avancer à votre rythme.</p>
       </div>
       <section className="hero-card" aria-labelledby="hero-title">
         <div className="hero-content">
-          <span className="pill"><Layers3 size={15} aria-hidden="true" />Les fondations</span>
-          <h2 id="hero-title">Votre espace<br />se prépare.</h2>
-          <p>Ny Volako se construit étape par étape. Vous pouvez maintenant créer votre compte et préparer votre espace personnel.</p>
+          <span className="pill"><Layers3 size={15} aria-hidden="true" />Votre carnet local</span>
+          <h2 id="hero-title">Vos dépenses,<br />l’esprit plus léger.</h2>
+          <p>Enregistrez vos achats, retrouvez votre historique et gardez un œil sur votre budget. Vos saisies restent sur cet appareil.</p>
           <Link to="/compte" className="primary-link">Ouvrir mon compte<ArrowUpRight size={18} aria-hidden="true" /></Link>
           <Link to="/configuration" className="primary-link">Voir la configuration<ArrowUpRight size={18} aria-hidden="true" /></Link>
         </div>
@@ -77,14 +92,14 @@ function Welcome() {
         </div>
       </section>
       <section className="progress-section" aria-labelledby="steps-title">
-        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 3 sur 7</span></div>
+        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 4 sur 7</span></div>
         <div className="step-grid">
           <Step number="01" title="Poser les bases" text="L’architecture est validée. L’application et ses outils de vérification sont initialisés." current />
-          <Step number="02" title="Connecter votre compte" text="Une connexion personnelle et des accès protégés à vos données." />
-          <Step number="03" title="Suivre votre quotidien" text="Dépenses, budgets et consultation hors ligne viendront aux prochaines étapes." />
+          <Step number="02" title="Connecter votre compte" text="Une connexion personnelle et des accès protégés à vos données." current />
+          <Step number="03" title="Suivre votre quotidien" text="Dépenses, catégories et budgets sont disponibles sur cet appareil. La synchronisation arrive ensuite." current />
         </div>
       </section>
-      <p className="development-note">Cette version ne permet pas encore de saisir des dépenses. Aucune donnée financière n’est affichée ou enregistrée.</p>
+      <p className="development-note">Les dépenses sont enregistrées sur votre appareil. La synchronisation réseau sera activée à la phase 5.</p>
     </>
   )
 }
@@ -114,7 +129,7 @@ function Configuration() {
         <dl className="settings-list">
           <div><dt>Langue de l’interface</dt><dd>Français</dd></div>
           <div><dt>Devise prévue par défaut</dt><dd>Ariary · MGA</dd></div>
-          <div><dt>État du projet</dt><dd>Base et authentification · Phase 3</dd></div>
+          <div><dt>État du projet</dt><dd>Carnet local · Phase 4</dd></div>
         </dl>
       </section>
     </>

@@ -2,7 +2,7 @@
 
 Application personnelle de suivi des dépenses en français, conçue pour une future utilisation hors ligne sur ordinateur et mobile.
 
-**État : phase 3 — base et authentification.** Inscription avec confirmation, connexion, récupération du mot de passe et déconnexion. Migrations PostgreSQL, RLS, initialisation du compte et protocole RPC transactionnel. Les écrans de dépenses, IndexedDB, la synchronisation cliente et le service worker viendront aux phases suivantes. Aucune donnée financière de démonstration.
+**État : phase 4 — fonctionnalités principales.** Dépenses, historique filtrable, catégories, budgets avec alertes et tableau de bord. Les modifications sont enregistrées dans IndexedDB avec une file persistante, isolée par compte et projet Supabase. L’import initial utilise les RPC de phase 3 ; **aucune modification locale n’est encore envoyée au serveur**. La synchronisation cliente est prévue en phase 5, le cache PWA en phase 6. Aucune donnée financière de démonstration.
 
 ## Prérequis
 
@@ -94,7 +94,13 @@ Remove-Item Env:PLAYWRIGHT_CHANNEL
 
 Tests présents : navigation, route directe après rechargement, page inconnue, accès clavier au contenu, absence d’erreurs JavaScript et de débordement horizontal sur la configuration ; variables absentes/invalides, URL non sûre, clé anon et refus des clés privilégiées.
 
-Les tests SQL vérifient RLS et les RPC avec deux comptes et le rôle anonyme. Les tests Auth locaux vérifient les emails, la récupération, la session persistante et les mutations concurrentes. Le vrai stockage IndexedDB, les interruptions de synchronisation et le mode avion seront testés aux phases 4 à 6 ; le fonctionnement hors ligne n’est pas encore implémenté.
+Les tests SQL vérifient RLS et les RPC avec deux comptes et le rôle anonyme. Les tests Auth locaux vérifient les emails, la récupération, la session persistante et les mutations concurrentes. Les tests du carnet couvrent les calculs exacts, les transactions et leur annulation, les alertes, les modifications concurrentes et le verrou de déconnexion. Les parcours navigateur utilisent le vrai IndexedDB : saisie sans réseau dans l’application déjà ouverte, fermeture/réouverture de page, export et isolation de deux comptes. Le démarrage à froid sans réseau et les interruptions de synchronisation restent à tester dans les phases suivantes.
+
+## Utiliser le carnet
+
+Après connexion, ouvrir `/tableau-de-bord`. `/depenses/nouvelle` permet la saisie, `/depenses` la recherche et la modification/suppression, `/categories` la gestion des catégories et `/budgets` les plafonds et seuils mensuels. `/compte` propose un export JSON et la déconnexion.
+
+La première ouverture exige le réseau. Ensuite, les saisies fonctionnent sans réseau tant que l’application est chargée. En présence d’opérations en attente, la déconnexion exige une sauvegarde à jour et sa confirmation. Les données restent sur l’appareil pour la reconnexion au même compte ; IndexedDB n’est pas chiffré et l’effacement des données du navigateur peut le supprimer. La restauration automatique d’un export est prévue avec la synchronisation.
 
 ## Structure actuelle
 
@@ -103,6 +109,10 @@ Les tests SQL vérifient RLS et les RPC avec deux comptes et le rôle anonyme. L
 - `src/config/` : validation des variables publiques.
 - `src/features/auth/` : session, formulaires et route privée.
 - `src/data/remote/` : client Supabase et types générés.
+- `src/data/local/` : base Dexie par compte et file d’opérations.
+- `src/domain/` : validation et calculs décimaux exacts.
+- `src/services/` : écritures transactionnelles, alertes et sauvegarde.
+- `src/features/finance/` : écrans du carnet et graphiques.
 - `supabase/` : configuration locale, migrations et tests SQL.
 - `scripts/test-local-auth.mjs` : vérification navigateur avec Supabase local.
 - `src/test/` : préparation de Testing Library.
@@ -110,7 +120,7 @@ Les tests SQL vérifient RLS et les RPC avec deux comptes et le rôle anonyme. L
 - `docs/` : conception et bilan de phase.
 - `.github/workflows/ci.yml` : installation verrouillée, contrôles et tests navigateur à chaque push/PR.
 
-Dexie, Recharts et les outils PWA sont installés pour les étapes prévues. Le client Supabase est désormais actif lorsque les paramètres publics sont renseignés.
+Dexie et Recharts sont utilisés par le carnet. Les outils PWA sont installés mais le service worker n’est pas encore activé. Le client Supabase est actif lorsque les paramètres publics sont renseignés.
 
 ## Déploiement prévu
 
@@ -123,4 +133,5 @@ Supabase hébergé existant : projet `ny_volako`. Les migrations de phase 3 sont
 - [Conception validée](docs/PHASE-1-CONCEPTION.md)
 - [Bilan de phase 2](docs/PHASE-2-INITIALISATION.md)
 - [Base et authentification](docs/PHASE-3-BASE-AUTH.md)
+- [Fonctionnalités principales et vérifications](docs/PHASE-4-FONCTIONNALITES.md)
 - [Contrat RPC](docs/SYNCHRONISATION.md)

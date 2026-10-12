@@ -7,7 +7,7 @@ test('le build démarre, navigue et recharge une route directe', async ({ page }
   await page.goto('/')
   await expect(page).toHaveTitle('Ny Volako · Mes dépenses, simplement')
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Un peu plus de clarté')
-  await expect(page.getByText(/ne permet pas encore de saisir des dépenses/)).toBeVisible()
+  await expect(page.getByText(/Les dépenses sont enregistrées sur votre appareil/)).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   await page.screenshot({ path: testInfo.outputPath('accueil.png'), fullPage: true })
   await page.getByRole('link', { name: 'Voir la configuration' }).click()

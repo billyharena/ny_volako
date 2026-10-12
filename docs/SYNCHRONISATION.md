@@ -26,4 +26,14 @@ Erreurs SQL : `22023` validation/protocole, `42501` permission/identité absente
 
 Le navigateur dispose uniquement de SELECT sur les tables et EXECUTE sur les RPC. Les fonctions internes sont dans `private`, non exposé, avec search_path vide, détenues par `ny_volako_writer`, rôle NOLOGIN/NOINHERIT/NOBYPASSRLS non propriétaire des tables. Les politiques RLS filtrent par `auth.uid()`. Comme Supabase ne permet pas de déléguer USAGE sur son schéma Auth, l’identité interne utilise exactement la lecture de claims vérifiés employée par `auth.uid()` ; aucune identité n’est acceptée dans les arguments métier. Le rôle authenticated n’est pas membre du rôle interne.
 
-Tombstones et reçus sont conservés sans purge en V1. Le moteur Dexie, les chaînes de dépendances, les réessais et la résolution visuelle des conflits seront implémentés dans les phases 4 et 5.
+Tombstones et reçus sont conservés sans purge en V1.
+
+## Carnet local livré en phase 4
+
+La base Dexie est isolée par URL de projet et UUID de compte. L’import initial valide les réponses paginées et écrit l’ensemble dans une transaction après les lectures réseau. Un carnet déjà initialisé n’est pas remplacé lors d’une reconnexion.
+
+Chaque écriture métier, opération en attente et transition d’alerte appartient à la même transaction IndexedDB. La file contient `format_version: 1`, `operation_id`, `user_id`, `entity`, `entity_id`, `kind`, `payload`, `base_version`, `predecessor_id`, `created_at`, `attempt_count: 0`, `status: pending` et un numéro local `sequence`. Le payload conserve des chaînes pour les décimales. La première opération utilise la version serveur connue (ou `"0"` à la création). Une opération dépendante référence l’UUID de la précédente avec `base_version: null` : le moteur de phase 5 devra fixer cette version à partir du reçu précédent avant le premier envoi, puis conserver la requête exacte pour les réessais. Ne jamais envoyer une version null à la RPC.
+
+`local_revision` protège les formulaires contre une écriture concurrente dans un autre onglet. Les suppressions de dépenses restent des tombstones. La déconnexion vérifie la fraîcheur de l’export puis verrouille les écritures des onglets de la même session Auth, dans une transaction commune aux mutations métier. Une nouvelle session peut rouvrir le carnet conservé.
+
+La phase 5 doit encore implémenter les envois ordonnés, reçus, réessais, renouvellement d’authentification, lectures de rapprochement, reprise après interruption, restauration d’export et résolution visuelle des conflits. La phase 4 n’effectue aucun envoi de la file, même lorsque le navigateur est connecté.

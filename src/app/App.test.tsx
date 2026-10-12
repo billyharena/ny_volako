@@ -9,7 +9,7 @@ describe('socle de navigation', () => {
     const user = userEvent.setup()
     render(<MemoryRouter><App /></MemoryRouter>)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Un peu plus de clarté')
-    expect(screen.getByText(/ne permet pas encore de saisir des dépenses/)).toBeVisible()
+    expect(screen.getByText(/Les dépenses sont enregistrées sur votre appareil/)).toBeVisible()
     await user.click(screen.getByRole('link', { name: 'Voir la configuration' }))
     expect(screen.getByRole('heading', { level: 1, name: 'Configuration' })).toBeVisible()
     expect(screen.getByRole('status')).toHaveTextContent(/prochaine étape|reste à vérifier|invalide/)
