@@ -7,6 +7,8 @@ test.describe('carnet local', () => {
   test.skip(process.env.LOCAL_AUTH_E2E !== '1', 'Nécessite Supabase et Mailpit locaux.')
   test.setTimeout(180_000)
   test('budget, CRUD sans réseau, réouverture, export et séparation des comptes', async ({ page, context }, testInfo) => {
+    // Conserver ce parcours de sauvegarde avec le serveur de mutations indisponible.
+    await context.route('**/rest/v1/rpc/apply_change', route => route.abort())
     const user = await registerAccount(page)
     await page.getByRole('link', { name: 'Budget', exact: true }).click()
     const month = await page.getByLabel('Mois du budget').inputValue()

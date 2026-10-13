@@ -31,7 +31,7 @@ export function ExpenseHistory() {
     <div className="section-heading"><h2>{expenses.length} dépense{expenses.length > 1 ? 's' : ''}</h2><strong>Total filtré : {money(sumExpenses(expenses), data.settings.currency)}</strong></div>
     {!expenses.length ? <div className="panel empty-state"><h2>Aucune dépense à afficher</h2><p>Ajoutez votre premier achat ou ajustez les filtres.</p><Link className="primary-link" to="/depenses/nouvelle">Ajouter une dépense</Link></div>
       : <ul className="expense-list">{expenses.map(expense => <li key={expense.id}>
-        <div><Link className="expense-title" to={`/depenses/${expense.id}`}>{expense.motif}</Link><p>{expense.expense_date.split('-').reverse().join('/')} · {names.get(expense.category_id) ?? 'Catégorie indisponible'}</p><span className="sync-chip">{expense.local_revision > 0 ? 'En attente' : 'Copie serveur'}</span></div>
+        <div><Link className="expense-title" to={`/depenses/${expense.id}`}>{expense.motif}</Link><p>{expense.expense_date.split('-').reverse().join('/')} · {names.get(expense.category_id) ?? 'Catégorie indisponible'}</p><span className="sync-chip">{data.pendingIds?.includes(expense.id) ? 'En attente' : 'Confirmée serveur'}</span></div>
         <strong>{money(expense.total, data.settings.currency)}</strong>
       </li>)}</ul>}
   </>

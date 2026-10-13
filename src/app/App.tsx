@@ -9,6 +9,7 @@ import { Dashboard } from '../features/finance/Dashboard'
 import { ExpenseEditor, ExpenseHistory } from '../features/finance/Expenses'
 import { Categories } from '../features/finance/Categories'
 import { Budgets } from '../features/finance/Budgets'
+import { Synchronization } from '../features/finance/Synchronization'
 
 const environment = readEnvironment(import.meta.env)
 
@@ -54,6 +55,7 @@ export function App() {
               <Route path="/depenses/:id" element={<ExpenseEditor />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/budgets" element={<Budgets />} />
+              <Route path="/synchronisation" element={<Synchronization />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -76,7 +78,7 @@ function Welcome() {
         <div className="hero-content">
           <span className="pill"><Layers3 size={15} aria-hidden="true" />Votre carnet local</span>
           <h2 id="hero-title">Vos dépenses,<br />l’esprit plus léger.</h2>
-          <p>Enregistrez vos achats, retrouvez votre historique et gardez un œil sur votre budget. Vos saisies restent sur cet appareil.</p>
+          <p>Enregistrez vos achats, retrouvez votre historique et gardez un œil sur votre budget. Vos saisies sont conservées sur cet appareil puis synchronisées avec votre compte.</p>
           <Link to="/compte" className="primary-link">Ouvrir mon compte<ArrowUpRight size={18} aria-hidden="true" /></Link>
           <Link to="/configuration" className="primary-link">Voir la configuration<ArrowUpRight size={18} aria-hidden="true" /></Link>
         </div>
@@ -92,14 +94,14 @@ function Welcome() {
         </div>
       </section>
       <section className="progress-section" aria-labelledby="steps-title">
-        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 4 sur 7</span></div>
+        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 5 sur 7</span></div>
         <div className="step-grid">
           <Step number="01" title="Poser les bases" text="L’architecture est validée. L’application et ses outils de vérification sont initialisés." current />
           <Step number="02" title="Connecter votre compte" text="Une connexion personnelle et des accès protégés à vos données." current />
-          <Step number="03" title="Suivre votre quotidien" text="Dépenses, catégories et budgets sont disponibles sur cet appareil. La synchronisation arrive ensuite." current />
+          <Step number="03" title="Suivre votre quotidien" text="Dépenses, catégories et budgets sont disponibles sur cet appareil. Les changements se synchronisent lorsque le réseau est disponible." current />
         </div>
       </section>
-      <p className="development-note">Les dépenses sont enregistrées sur votre appareil. La synchronisation réseau sera activée à la phase 5.</p>
+      <p className="development-note">Les dépenses sont enregistrées sur votre appareil. Les échanges reprennent au retour du réseau ; les conflits restent soumis à votre choix.</p>
     </>
   )
 }
@@ -125,11 +127,11 @@ function Configuration() {
         <span className="setting-icon"><Settings2 size={24} aria-hidden="true" /></span>
         <h2 id="connection-title">Connexion au compte</h2>
         <p role="status">{environment.message}</p>
-        <p>La connexion nécessite un serveur Supabase configuré. La synchronisation hors ligne sera ajoutée à la phase 5.</p>
+        <p>La connexion nécessite un serveur Supabase configuré. Les saisies locales sont synchronisées lorsque votre session et le réseau le permettent.</p>
         <dl className="settings-list">
           <div><dt>Langue de l’interface</dt><dd>Français</dd></div>
           <div><dt>Devise prévue par défaut</dt><dd>Ariary · MGA</dd></div>
-          <div><dt>État du projet</dt><dd>Carnet local · Phase 4</dd></div>
+          <div><dt>État du projet</dt><dd>Synchronisation · Phase 5</dd></div>
         </dl>
       </section>
     </>

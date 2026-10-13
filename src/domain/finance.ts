@@ -7,7 +7,7 @@ export type BudgetInput = { month_start: string; budget_limit: string; warning_t
 export type Budget = RecordBase & BudgetInput
 export type Settings = { user_id: string; currency: string; timezone: string; locale: string; theme: string; version: string }
 export type Alert = { id: string; month: string; thresholds: number[]; created_at: string; dismissed: boolean }
-export type Snapshot = { categories: Category[]; expenses: Expense[]; budgets: Budget[]; settings: Settings; pending: number; alerts: Alert[] }
+export type Snapshot = { categories: Category[]; expenses: Expense[]; budgets: Budget[]; settings: Settings; pending: number; alerts: Alert[]; pendingIds?: string[] }
 
 export class ValidationError extends Error {
   constructor(public readonly fields: Record<string, string>) { super(Object.values(fields)[0] ?? 'Valeur invalide.') }

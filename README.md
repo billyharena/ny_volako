@@ -2,7 +2,7 @@
 
 Application personnelle de suivi des dépenses en français, conçue pour une future utilisation hors ligne sur ordinateur et mobile.
 
-**État : phase 4 — fonctionnalités principales.** Dépenses, historique filtrable, catégories, budgets avec alertes et tableau de bord. Les modifications sont enregistrées dans IndexedDB avec une file persistante, isolée par compte et projet Supabase. L’import initial utilise les RPC de phase 3 ; **aucune modification locale n’est encore envoyée au serveur**. La synchronisation cliente est prévue en phase 5, le cache PWA en phase 6. Aucune donnée financière de démonstration.
+**État : phase 5 — synchronisation et reprise.** Dépenses, historique, catégories, budgets et tableau de bord utilisent IndexedDB. La file persistante se synchronise avec Supabase, avec reçus idempotents, réessais, protection entre onglets et résolution explicite des conflits. Export et restauration des opérations sont disponibles. Le cache PWA reste prévu en phase 6. Aucune donnée financière de démonstration.
 
 ## Prérequis
 
@@ -94,13 +94,15 @@ Remove-Item Env:PLAYWRIGHT_CHANNEL
 
 Tests présents : navigation, route directe après rechargement, page inconnue, accès clavier au contenu, absence d’erreurs JavaScript et de débordement horizontal sur la configuration ; variables absentes/invalides, URL non sûre, clé anon et refus des clés privilégiées.
 
-Les tests SQL vérifient RLS et les RPC avec deux comptes et le rôle anonyme. Les tests Auth locaux vérifient les emails, la récupération, la session persistante et les mutations concurrentes. Les tests du carnet couvrent les calculs exacts, les transactions et leur annulation, les alertes, les modifications concurrentes et le verrou de déconnexion. Les parcours navigateur utilisent le vrai IndexedDB : saisie sans réseau dans l’application déjà ouverte, fermeture/réouverture de page, export et isolation de deux comptes. Le démarrage à froid sans réseau et les interruptions de synchronisation restent à tester dans les phases suivantes.
+Les tests SQL vérifient RLS et les RPC avec deux comptes et le rôle anonyme. Les tests Auth locaux vérifient les emails, la récupération et la session persistante. Les tests du carnet et de synchronisation couvrent calculs exacts, transactions, alertes, conflits, reçus perdus, réessais, migration Dexie, restauration et isolation des comptes. Les parcours navigateur utilisent le vrai IndexedDB et Supabase local, y compris deux contextes concurrents et un profil conservé après fermeture complète du navigateur. Le démarrage à froid sans réseau nécessite le cache PWA de phase 6.
 
 ## Utiliser le carnet
 
-Après connexion, ouvrir `/tableau-de-bord`. `/depenses/nouvelle` permet la saisie, `/depenses` la recherche et la modification/suppression, `/categories` la gestion des catégories et `/budgets` les plafonds et seuils mensuels. `/compte` propose un export JSON et la déconnexion.
+Après connexion, ouvrir `/tableau-de-bord`. `/depenses/nouvelle` permet la saisie, `/depenses` la recherche et la modification/suppression, `/categories` la gestion des catégories et `/budgets` les plafonds et seuils mensuels. `/synchronisation` affiche les opérations, erreurs et conflits, et permet une relance manuelle. `/compte` propose export, restauration JSON et déconnexion.
 
-La première ouverture exige le réseau. Ensuite, les saisies fonctionnent sans réseau tant que l’application est chargée. En présence d’opérations en attente, la déconnexion exige une sauvegarde à jour et sa confirmation. Les données restent sur l’appareil pour la reconnexion au même compte ; IndexedDB n’est pas chiffré et l’effacement des données du navigateur peut le supprimer. La restauration automatique d’un export est prévue avec la synchronisation.
+La première ouverture exige le réseau. Ensuite, les saisies fonctionnent sans réseau tant que l’application est chargée. La synchronisation reprend à la reconnexion ; une session expirée suspend les échanges sans effacer le carnet. En présence d’opérations en attente, terminer leur synchronisation ou télécharger une sauvegarde à jour et confirmer sa réception avant déconnexion. Les données restent sur l’appareil pour la reconnexion au même compte ; IndexedDB n’est pas chiffré et l’effacement des données du navigateur peut le supprimer.
+
+Une restauration exige une file actuelle vide et un fichier du même compte/serveur (10 Mo maximum). Elle reprend les UUID des opérations pour éviter les doublons ; les données déjà confirmées sont relues du serveur. Les conflits restent soumis à votre choix. Après fermeture brutale d’un onglet, la reprise peut attendre l’expiration de son bail, au maximum une minute hors throttling du navigateur. Les réessais respectent aussi le délai demandé par le serveur.
 
 ## Structure actuelle
 
@@ -112,6 +114,7 @@ La première ouverture exige le réseau. Ensuite, les saisies fonctionnent sans 
 - `src/data/local/` : base Dexie par compte et file d’opérations.
 - `src/domain/` : validation et calculs décimaux exacts.
 - `src/services/` : écritures transactionnelles, alertes et sauvegarde.
+- `src/sync/` : transport authentifié, ordonnancement, reçus, conflits et restauration.
 - `src/features/finance/` : écrans du carnet et graphiques.
 - `supabase/` : configuration locale, migrations et tests SQL.
 - `scripts/test-local-auth.mjs` : vérification navigateur avec Supabase local.
@@ -134,4 +137,5 @@ Supabase hébergé existant : projet `ny_volako`. Les migrations de phase 3 sont
 - [Bilan de phase 2](docs/PHASE-2-INITIALISATION.md)
 - [Base et authentification](docs/PHASE-3-BASE-AUTH.md)
 - [Fonctionnalités principales et vérifications](docs/PHASE-4-FONCTIONNALITES.md)
+- [Synchronisation et reprise](docs/PHASE-5-SYNCHRONISATION.md)
 - [Contrat RPC](docs/SYNCHRONISATION.md)

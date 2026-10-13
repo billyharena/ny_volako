@@ -13,11 +13,12 @@ export function AuthPage({ mode }: { mode: Mode }) {
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState<{ message: string; failed: boolean } | null>(null)
   const [completed, setCompleted] = useState(false)
+  const renew = mode === 'login' && new URLSearchParams(window.location.search).get('renew') === '1'
   const callbackError = new URLSearchParams(window.location.search).has('error')
     || new URLSearchParams(window.location.hash.slice(1)).has('error')
 
   if (loading) return <p role="status">Vérification de votre session…</p>
-  if (session && (mode === 'login' || mode === 'register' || completed)) return <Navigate to="/compte" replace />
+  if (session && ((mode === 'login' && !renew) || mode === 'register' || completed)) return <Navigate to="/compte" replace />
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -45,7 +46,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         setFeedback({ message, failed: true })
       } else {
         form.reset()
-        if (mode === 'recover') setCompleted(true)
+        if (mode === 'recover' || mode === 'login') setCompleted(true)
         setFeedback({ failed: false, message: mode === 'register'
           ? 'Si cette adresse peut être inscrite, un email de confirmation vous attend. Ouvrez-le dans ce navigateur.'
           : mode === 'reset' ? 'Si un compte correspond à cette adresse, vous recevrez un lien. Ouvrez-le dans ce navigateur.'
