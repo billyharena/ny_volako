@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { App } from './App'
 
 describe('socle de navigation', () => {
-  it('présente honnêtement la phase et ouvre la configuration', async () => {
+  it('présente le carnet et ouvre la configuration', async () => {
     const user = userEvent.setup()
     render(<MemoryRouter><App /></MemoryRouter>)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Un peu plus de clarté')

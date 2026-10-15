@@ -36,14 +36,14 @@ export function App() {
           <NavLink to="/compte"><Wallet size={20} aria-hidden="true" />Mon compte</NavLink>
         </nav>
         <div className="sidebar-note">
-          <span className="small-dot" />Un projet qui prend forme
-          <p>Des bases solides pour vos dépenses du quotidien.</p>
+          <span className="small-dot" />Votre carnet au quotidien
+          <p>Vos dépenses et votre budget, à portée de main.</p>
         </div>
       </aside>
       <div className="workspace">
         <header className="topbar">
           <span>Espace personnel</span>
-          <span className="phase-badge"><span className="small-dot" />Version de développement</span>
+          <span className="phase-badge"><span className="small-dot" />Mon carnet de dépenses</span>
         </header>
         <main id="main" tabIndex={-1}>
           <UpdateNotice />
@@ -104,9 +104,9 @@ function Welcome() {
         </div>
       </section>
       <section className="progress-section" aria-labelledby="steps-title">
-        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 6 sur 7</span></div>
+        <div className="section-heading"><h2 id="steps-title">Votre quotidien, simplement</h2><span>Trois repères</span></div>
         <div className="step-grid">
-          <Step number="01" title="Poser les bases" text="L’architecture est validée. L’application et ses outils de vérification sont initialisés." current />
+          <Step number="01" title="Saisir vos dépenses" text="Enregistrez vos achats sur cet appareil, même sans réseau après une première connexion." current />
           <Step number="02" title="Connecter votre compte" text="Une connexion personnelle et des accès protégés à vos données." current />
           <Step number="03" title="Suivre votre quotidien" text="Dépenses, catégories et budgets sont disponibles sur cet appareil. Les changements se synchronisent lorsque le réseau est disponible." current />
         </div>
@@ -119,7 +119,7 @@ function Welcome() {
 function Step({ number, title, text, current = false }: { number: string; title: string; text: string; current?: boolean }) {
   return (
     <article className="step-card">
-      <div className="step-top"><span>{number}</span>{current ? <Check size={18} aria-label="Socle initialisé" /> : <Circle size={15} aria-label="À venir" />}</div>
+      <div className="step-top"><span>{number}</span>{current ? <Check size={18} aria-label="Disponible" /> : <Circle size={15} aria-label="À venir" />}</div>
       <h3>{title}</h3><p>{text}</p>
     </article>
   )
@@ -140,8 +140,8 @@ function Configuration() {
         <p>La connexion nécessite un serveur Supabase configuré. Les saisies locales sont synchronisées lorsque votre session et le réseau le permettent.</p>
         <dl className="settings-list">
           <div><dt>Langue de l’interface</dt><dd>Français</dd></div>
-          <div><dt>Devise prévue par défaut</dt><dd>Ariary · MGA</dd></div>
-          <div><dt>État du projet</dt><dd>Application installable · Phase 6</dd></div>
+          <div><dt>Devise par défaut</dt><dd>Ariary · MGA</dd></div>
+          <div><dt>Application</dt><dd>Installable sur les navigateurs compatibles</dd></div>
         </dl>
       </section>
     </>
