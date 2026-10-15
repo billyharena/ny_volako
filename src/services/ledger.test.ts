@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AccountDatabase } from '../data/local/database'
 import { Ledger } from './ledger'
 import type { ExpenseInput } from '../domain/finance'
+import { cancelUpdate, pauseForUpdate, registerUpdateParticipant } from '../pwa/update-gate'
 
 const account = '11111111-1111-4111-8111-111111111111'
 let db: AccountDatabase, ledger: Ledger
@@ -15,6 +16,22 @@ beforeEach(async () => {
 afterEach(async () => { vi.restoreAllMocks(); ledger.deactivate(); await db.delete() })
 
 describe('transactions du carnet', () => {
+  it('gèle les nouvelles écritures pendant une mise à jour et reprend après annulation', async () => {
+    await ledger.saveExpense(input)
+    const before = await db.queue.toArray()
+    const resume = vi.fn()
+    const unregister = registerUpdateParticipant({ pause: () => db.transaction('rw', db.tables, () => undefined), resume })
+    try {
+      await pauseForUpdate()
+      await expect(ledger.saveExpense({ ...input, motif: 'Trop tard' })).rejects.toThrow('Mise à jour')
+      expect(await db.queue.toArray()).toEqual(before)
+      expect(await db.expenses.count()).toBe(1)
+      cancelUpdate()
+      expect(resume).toHaveBeenCalledOnce()
+      await ledger.saveExpense({ ...input, motif: 'Après annulation' })
+      expect(await db.expenses.count()).toBe(2)
+    } finally { cancelUpdate(); unregister() }
+  })
   it('persiste la dépense avec son opération et conserve la chaîne de versions', async () => {
     const id = await ledger.saveExpense(input)
     let row = (await db.expenses.get(id))!

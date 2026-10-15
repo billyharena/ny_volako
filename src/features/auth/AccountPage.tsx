@@ -50,7 +50,7 @@ export function AccountPage() {
     } catch (error) { setError(error instanceof Error ? error.message : 'Restauration impossible.') }
     finally { setBusy(false) }
   }
-  return <>
+  return <div aria-busy={busy}>
     <div className="page-heading"><p className="eyebrow">VOTRE ESPACE</p><h1>Mon compte</h1><p className="account-email">{session?.user.email}</p></div>
     <section className="settings-card"><h2>Un compte, vos données</h2><p role="status">Votre compte est prêt. Votre carnet est conservé sur cet appareil.</p><Link className="primary-link" to="/tableau-de-bord">Ouvrir mon carnet</Link>
       <dl className="settings-list"><div><dt>Devise</dt><dd>{data.settings.currency}</dd></div><div><dt>Fuseau du budget</dt><dd>{data.settings.timezone}</dd></div><div><dt>Opérations en attente</dt><dd>{data.pending}</dd></div></dl>
@@ -64,5 +64,5 @@ export function AccountPage() {
       <p className="field-hint">La déconnexion ferme l’accès dans l’application et conserve les données locales. IndexedDB n’est pas chiffré : sur un appareil partagé, utilisez un profil navigateur personnel.</p>
     </section>
     <section className="settings-card"><h2>Restaurer une sauvegarde</h2><p>La file actuelle doit être vide. Les opérations de la sauvegarde seront reprises avec leurs identifiants d’origine pour éviter les doublons. Les données déjà confirmées seront relues du serveur.</p><label>Fichier de sauvegarde JSON<input type="file" accept="application/json,.json" disabled={busy} onChange={event => { setRestoreFile(event.target.files?.[0] ?? null); setRestoreConfirmed(false); setRestored(false) }} /></label><label className="checkbox-label"><input type="checkbox" disabled={!restoreFile || busy} checked={restoreConfirmed} onChange={event => setRestoreConfirmed(event.target.checked)} />Je confirme que cette sauvegarde provient de mon compte et de ce serveur.</label><button className="primary-link" disabled={!restoreFile || !restoreConfirmed || busy || data.pending > 0} onClick={() => { void restoreData() }}>Restaurer les opérations</button>{restored && <p role="status">Sauvegarde restaurée. Consultez la synchronisation pour suivre les opérations.</p>}</section>
-  </>
+  </div>
 }

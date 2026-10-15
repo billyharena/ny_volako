@@ -118,3 +118,24 @@ footer { max-width: 1200px; padding: 5px 48px 28px; margin: 0 auto; font-size: 1
 .field-hint { font-weight: 400; font-size: .875rem; }
 button.primary-link { border: 0; cursor: pointer; font: inherit; }
 button:disabled { opacity: .65; cursor: wait; }
+.pwa-controls, .update-notice { margin-top: 28px; padding: 16px 20px; border: 1px solid #c8d6c5; border-radius: 12px; background: #edf2e7; font-size: 14px; line-height: 1.7; }
+.pwa-controls summary { cursor: pointer; min-height: 44px; display: list-item; align-content: center; font-weight: 600; }
+.pwa-content { max-width: 70ch; }
+.update-notice { margin: 0 0 24px; background: #fff4d6; border-color: #b98b3c; }
+.update-notice p { margin-top: 0; }
+:focus-visible { outline: 3px solid #376e56; outline-offset: 3px; }
+html { scroll-padding-bottom: 100px; }
+input, select, textarea { min-width: 0; }
+.settings-list dd, .expense-title, .panel p { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .sidebar { padding-top: max(20px, env(safe-area-inset-top)); }
+  nav { padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right)); gap: 2px; }
+  nav a { padding-inline: 6px; font-size: 11px; min-width: 0; }
+  main { padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+  input, select, textarea { font-size: 16px; }
+  .section-heading { flex-wrap: wrap; }
+  footer { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

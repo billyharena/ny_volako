@@ -16,7 +16,7 @@ const env = {
   VITE_SUPABASE_PUBLISHABLE_KEY: configuration.PUBLISHABLE_KEY,
   LOCAL_AUTH_E2E: '1',
 }
-for (const args of [['build'], ['test:e2e']]) {
+for (const args of [['build'], ['test:e2e'], ['test:pwa']]) {
   const result = spawnSync(pnpm, args, { env, stdio: 'inherit', shell: process.platform === 'win32' })
   if (result.status !== 0) process.exit(result.status ?? 1)
 }

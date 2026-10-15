@@ -27,4 +27,5 @@ test('navigation clavier et page introuvable', async ({ page }) => {
   await expect(page.getByRole('main')).toBeFocused()
   await page.getByRole('link', { name: 'Retour à l’accueil' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Un peu plus de clarté')
+  await expect(page.getByRole('main')).toBeFocused()
 })

@@ -1,8 +1,8 @@
 # Ny Volako
 
-Application personnelle de suivi des dépenses en français, conçue pour une future utilisation hors ligne sur ordinateur et mobile.
+Application personnelle de suivi des dépenses en français, utilisable hors ligne sur ordinateur et mobile après une première connexion.
 
-**État : phase 5 — synchronisation et reprise.** Dépenses, historique, catégories, budgets et tableau de bord utilisent IndexedDB. La file persistante se synchronise avec Supabase, avec reçus idempotents, réessais, protection entre onglets et résolution explicite des conflits. Export et restauration des opérations sont disponibles. Le cache PWA reste prévu en phase 6. Aucune donnée financière de démonstration.
+**État : phase 6 — PWA et interface.** Dépenses, historique, catégories, budgets et tableau de bord utilisent IndexedDB. La file persistante se synchronise avec Supabase, avec reçus idempotents, réessais, protection entre onglets et résolution explicite des conflits. Le build comprend maintenant le cache hors ligne, le manifeste et les commandes d’installation et de mise à jour. Export et restauration des opérations sont disponibles. Aucune donnée financière de démonstration.
 
 ## Prérequis
 
@@ -94,13 +94,21 @@ Remove-Item Env:PLAYWRIGHT_CHANNEL
 
 Tests présents : navigation, route directe après rechargement, page inconnue, accès clavier au contenu, absence d’erreurs JavaScript et de débordement horizontal sur la configuration ; variables absentes/invalides, URL non sûre, clé anon et refus des clés privilégiées.
 
-Les tests SQL vérifient RLS et les RPC avec deux comptes et le rôle anonyme. Les tests Auth locaux vérifient les emails, la récupération et la session persistante. Les tests du carnet et de synchronisation couvrent calculs exacts, transactions, alertes, conflits, reçus perdus, réessais, migration Dexie, restauration et isolation des comptes. Les parcours navigateur utilisent le vrai IndexedDB et Supabase local, y compris deux contextes concurrents et un profil conservé après fermeture complète du navigateur. Le démarrage à froid sans réseau nécessite le cache PWA de phase 6.
+Les tests SQL vérifient RLS et les RPC avec deux comptes et le rôle anonyme. Les tests Auth locaux vérifient les emails, la récupération et la session persistante. Les tests du carnet et de synchronisation couvrent calculs exacts, transactions, alertes, conflits, reçus perdus, réessais, migration Dexie, restauration et isolation des comptes. Les parcours navigateur utilisent le vrai IndexedDB et Supabase local, y compris deux contextes concurrents et un profil conservé après fermeture complète du navigateur, rouvert sans réseau avec une session stockée expirée. `test:e2e:local` exécute ensuite `test:pwa`, avec un serveur de test qui change le HTML et sa révision précachée pour vérifier la transition entre deux service workers. Ce serveur n’est pas livré dans `dist`.
 
 ## Utiliser le carnet
 
 Après connexion, ouvrir `/tableau-de-bord`. `/depenses/nouvelle` permet la saisie, `/depenses` la recherche et la modification/suppression, `/categories` la gestion des catégories et `/budgets` les plafonds et seuils mensuels. `/synchronisation` affiche les opérations, erreurs et conflits, et permet une relance manuelle. `/compte` propose export, restauration JSON et déconnexion.
 
-La première ouverture exige le réseau. Ensuite, les saisies fonctionnent sans réseau tant que l’application est chargée. La synchronisation reprend à la reconnexion ; une session expirée suspend les échanges sans effacer le carnet. En présence d’opérations en attente, terminer leur synchronisation ou télécharger une sauvegarde à jour et confirmer sa réception avant déconnexion. Les données restent sur l’appareil pour la reconnexion au même compte ; IndexedDB n’est pas chiffré et l’effacement des données du navigateur peut le supprimer.
+La première ouverture exige le réseau. Après préparation complète du cache, l’application peut redémarrer sans réseau. Une session stockée expirée permet seulement de rouvrir le carnet local ; toute synchronisation exige une identité vérifiée par Supabase. En présence d’opérations en attente, terminer leur synchronisation ou télécharger une sauvegarde à jour et confirmer sa réception avant déconnexion. Les données restent sur l’appareil pour la reconnexion au même compte ; IndexedDB n’est pas chiffré et l’effacement des données du navigateur peut le supprimer.
+
+## Installer et mettre à jour
+
+Compiler avec `pnpm build`, puis ouvrir `pnpm preview` : le service worker est activé uniquement dans le build, sur HTTPS ou localhost. La section « Installer et utiliser hors ligne » indique quand le cache est prêt, propose l’installation si le navigateur le permet, et permet de demander un stockage persistant. Sur Safari iOS : Partager → Sur l’écran d’accueil. La persistance reste une décision du navigateur et ne protège pas d’un effacement volontaire.
+
+Une nouvelle version affiche « Mettre à jour maintenant ». Enregistrer ou fermer les formulaires, attendre les opérations de sauvegarde/restauration et fermer les autres fenêtres de l’application. Le bouton suspend la synchronisation, bloque les nouvelles écritures et attend les transactions avant de recharger. Les données et UUID en attente restent dans IndexedDB. Aucun rechargement n’est imposé aux autres onglets. Les fichiers publics sont précachés ; aucune réponse Auth, REST ou RPC ne l’est. Les opérations ne sont pas envoyées quand l’application est fermée.
+
+Les icônes PNG sont reproductibles avec `node scripts/generate-icons.mjs`. Le schéma Dexie reste en version 2 ; les futures migrations doivent conserver les opérations et être testées avant publication.
 
 Une restauration exige une file actuelle vide et un fichier du même compte/serveur (10 Mo maximum). Elle reprend les UUID des opérations pour éviter les doublons ; les données déjà confirmées sont relues du serveur. Les conflits restent soumis à votre choix. Après fermeture brutale d’un onglet, la reprise peut attendre l’expiration de son bail, au maximum une minute hors throttling du navigateur. Les réessais respectent aussi le délai demandé par le serveur.
 
@@ -116,6 +124,7 @@ Une restauration exige une file actuelle vide et un fichier du même compte/serv
 - `src/services/` : écritures transactionnelles, alertes et sauvegarde.
 - `src/sync/` : transport authentifié, ordonnancement, reçus, conflits et restauration.
 - `src/features/finance/` : écrans du carnet et graphiques.
+- `src/pwa/` : précache public, installation, barrière d’écriture et mise à jour explicite.
 - `supabase/` : configuration locale, migrations et tests SQL.
 - `scripts/test-local-auth.mjs` : vérification navigateur avec Supabase local.
 - `src/test/` : préparation de Testing Library.
@@ -123,7 +132,7 @@ Une restauration exige une file actuelle vide et un fichier du même compte/serv
 - `docs/` : conception et bilan de phase.
 - `.github/workflows/ci.yml` : installation verrouillée, contrôles et tests navigateur à chaque push/PR.
 
-Dexie et Recharts sont utilisés par le carnet. Les outils PWA sont installés mais le service worker n’est pas encore activé. Le client Supabase est actif lorsque les paramètres publics sont renseignés.
+Dexie et Recharts sont utilisés par le carnet. Les écrans et graphiques sont chargés à la demande et restent précachés pour le mode hors ligne. Le client Supabase est actif lorsque les paramètres publics sont renseignés.
 
 ## Déploiement prévu
 
@@ -138,4 +147,5 @@ Supabase hébergé existant : projet `ny_volako`. Les migrations de phase 3 sont
 - [Base et authentification](docs/PHASE-3-BASE-AUTH.md)
 - [Fonctionnalités principales et vérifications](docs/PHASE-4-FONCTIONNALITES.md)
 - [Synchronisation et reprise](docs/PHASE-5-SYNCHRONISATION.md)
+- [PWA et interface](docs/PHASE-6-PWA.md)
 - [Contrat RPC](docs/SYNCHRONISATION.md)

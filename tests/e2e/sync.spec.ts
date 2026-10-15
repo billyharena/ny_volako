@@ -80,6 +80,8 @@ test.describe('synchronisation réelle', () => {
     await page.getByRole('link', { name: 'Sauvegarde à reprendre', exact: true }).click()
     await page.getByLabel('Quantité').fill('2')
     await page.getByRole('button', { name: 'Enregistrer la dépense' }).click()
+    await expect(page.getByRole('heading', { name: 'Mes dépenses', exact: true })).toBeVisible()
+    await expect(page.getByText('Total filtré : 25,00 Ar')).toBeVisible()
     await page.getByRole('link', { name: 'Mon compte', exact: true }).click()
     const downloadPromise = page.waitForEvent('download')
     await page.getByRole('button', { name: 'Exporter les données locales' }).click()
@@ -97,10 +99,16 @@ test.describe('synchronisation réelle', () => {
       await second.getByRole('link', { name: 'Suivre la synchronisation' }).click()
       await expect(second.getByRole('button', { name: 'Synchroniser maintenant' })).toBeEnabled()
       await second.getByRole('link', { name: 'Mon compte', exact: true }).click()
+      // Freeze network scheduling while importing; a periodic pull could otherwise
+      // start between the enabled-button check and the restore transaction.
+      await other.setOffline(true)
+      await expect(second.locator('.local-banner p')).toHaveText('Hors ligne. Vos saisies restent enregistrées sur cet appareil.')
       await second.getByLabel('Fichier de sauvegarde JSON').setInputFiles(backup)
       await second.getByRole('checkbox', { name: /Je confirme que cette sauvegarde/ }).check()
       await second.getByRole('button', { name: 'Restaurer les opérations' }).click()
-      await expect(second.getByText('Sauvegarde restaurée.', { exact: false })).toBeVisible(); await settled(second)
+      await expect(second.getByText('Sauvegarde restaurée.', { exact: false })).toBeVisible()
+      await expect(second.getByText('2 opérations en attente', { exact: true })).toBeVisible()
+      await other.setOffline(false); await settled(second)
       allow = true
       const peer = await context.newPage(); await peer.goto('/depenses')
       await sync(page); await settled(page)
@@ -126,15 +134,23 @@ test.describe('synchronisation réelle', () => {
     let persistent = await playwright.chromium.launchPersistentContext(profile, options)
     try {
       const page = await persistent.newPage(); await registerAccount(page)
+      await page.evaluate(async () => { await navigator.serviceWorker.ready })
+      await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true)
       await persistent.setOffline(true); await add(page, 'Après fermeture complète')
       await expect(page.getByText('1 opération en attente', { exact: true })).toBeVisible()
+      // Force the SDK's stored expiry into the past: local access cannot depend on refresh.
+      await page.evaluate(() => {
+        const key = Object.keys(localStorage).find(key => key.endsWith('-auth-token'))!
+        const session = JSON.parse(localStorage.getItem(key)!)
+        session.expires_at = 1
+        localStorage.setItem(key, JSON.stringify(session))
+      })
       await persistent.close()
-      persistent = await playwright.chromium.launchPersistentContext(profile, options)
-      await persistent.route('**/rest/v1/rpc/apply_change', route => route.abort())
+      persistent = await playwright.chromium.launchPersistentContext(profile, { ...options, offline: true })
       const reopened = await persistent.newPage(); await reopened.goto('/depenses')
       await expect(reopened.getByRole('link', { name: 'Après fermeture complète', exact: true })).toBeVisible()
       await expect(reopened.getByText('1 opération en attente', { exact: true })).toBeVisible()
-      await persistent.unroute('**/rest/v1/rpc/apply_change')
+      await persistent.setOffline(false)
       await sync(reopened); await settled(reopened)
     } finally { await persistent.close() }
   })

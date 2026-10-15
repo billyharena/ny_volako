@@ -1,4 +1,5 @@
 import type { Json } from '../data/remote/database.types'
+import { assertNotUpdating } from '../pwa/update-gate'
 import { AccountDatabase, type Operation } from '../data/local/database'
 import { budgetState, sumExpenses, validateExpense, validateBudget, ValidationError, type BudgetInput, type Category, type Entity, type ExpenseInput, type RecordBase, type Snapshot } from '../domain/finance'
 
@@ -8,6 +9,7 @@ export class Ledger {
   deactivate() { this.active = false }
   private guard() { if (!this.active) throw new Error('Ce compte n’est plus actif. Reconnectez-vous.') }
   async writable() {
+    assertNotUpdating()
     this.guard()
     if (await this.db.metadata.get(`logout:${this.sessionId}`)) throw new Error('Cette session est verrouillée pour la déconnexion. Reconnectez-vous avant de modifier le carnet.')
   }

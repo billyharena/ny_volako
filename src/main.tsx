@@ -5,6 +5,7 @@ import { App } from './app/App'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { AuthProvider } from './features/auth/AuthProvider'
 import './styles.css'
+import { startPwa } from './pwa/client'
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Point de montage de l’application introuvable.')
@@ -18,3 +19,5 @@ createRoot(root).render(
     </ErrorBoundary>
   </StrictMode>,
 )
+
+startPwa()

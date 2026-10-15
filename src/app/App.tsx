@@ -1,15 +1,20 @@
 import { ArrowUpRight, Check, Circle, Compass, Layers3, Settings2, Wallet } from 'lucide-react'
+import { lazy, Suspense } from 'react'
 import { NavLink, Route, Routes, Link } from 'react-router'
 import { readEnvironment } from '../config/environment'
-import { AuthPage } from '../features/auth/AuthPage'
-import { AccountPage } from '../features/auth/AccountPage'
 import { useAuth } from '../features/auth/context'
-import { PrivateWorkspace } from '../features/finance/PrivateWorkspace'
-import { Dashboard } from '../features/finance/Dashboard'
-import { ExpenseEditor, ExpenseHistory } from '../features/finance/Expenses'
-import { Categories } from '../features/finance/Categories'
-import { Budgets } from '../features/finance/Budgets'
-import { Synchronization } from '../features/finance/Synchronization'
+import { PwaControls, UpdateNotice } from '../pwa/PwaControls'
+import { RouteFocus } from './RouteFocus'
+
+const AccountPage = lazy(() => import('../features/auth/AccountPage').then(module => ({ default: module.AccountPage })))
+const AuthPage = lazy(() => import('../features/auth/AuthPage').then(module => ({ default: module.AuthPage })))
+const PrivateWorkspace = lazy(() => import('../features/finance/PrivateWorkspace').then(module => ({ default: module.PrivateWorkspace })))
+const Dashboard = lazy(() => import('../features/finance/Dashboard').then(module => ({ default: module.Dashboard })))
+const ExpenseEditor = lazy(() => import('../features/finance/Expenses').then(module => ({ default: module.ExpenseEditor })))
+const ExpenseHistory = lazy(() => import('../features/finance/Expenses').then(module => ({ default: module.ExpenseHistory })))
+const Categories = lazy(() => import('../features/finance/Categories').then(module => ({ default: module.Categories })))
+const Budgets = lazy(() => import('../features/finance/Budgets').then(module => ({ default: module.Budgets })))
+const Synchronization = lazy(() => import('../features/finance/Synchronization').then(module => ({ default: module.Synchronization })))
 
 const environment = readEnvironment(import.meta.env)
 
@@ -17,6 +22,7 @@ export function App() {
   const { session } = useAuth()
   return (
     <div className="app-layout">
+      <RouteFocus />
       <a className="skip-link" href="#main">Aller au contenu</a>
       <aside className="sidebar">
         <Link to="/" className="brand" aria-label="Ny Volako, accueil">
@@ -40,6 +46,8 @@ export function App() {
           <span className="phase-badge"><span className="small-dot" />Version de développement</span>
         </header>
         <main id="main" tabIndex={-1}>
+          <UpdateNotice />
+          <Suspense fallback={<p role="status">Ouverture de la page…</p>}>
           <Routes>
             <Route path="/" element={<Welcome />} />
             <Route path="/configuration" element={<Configuration />} />
@@ -59,6 +67,8 @@ export function App() {
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
+          <PwaControls />
         </main>
         <footer>Ny Volako <span>Simple aujourd’hui. Utile au quotidien.</span></footer>
       </div>
@@ -94,7 +104,7 @@ function Welcome() {
         </div>
       </section>
       <section className="progress-section" aria-labelledby="steps-title">
-        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 5 sur 7</span></div>
+        <div className="section-heading"><h2 id="steps-title">La suite, simplement</h2><span>Étape 6 sur 7</span></div>
         <div className="step-grid">
           <Step number="01" title="Poser les bases" text="L’architecture est validée. L’application et ses outils de vérification sont initialisés." current />
           <Step number="02" title="Connecter votre compte" text="Une connexion personnelle et des accès protégés à vos données." current />
@@ -131,7 +141,7 @@ function Configuration() {
         <dl className="settings-list">
           <div><dt>Langue de l’interface</dt><dd>Français</dd></div>
           <div><dt>Devise prévue par défaut</dt><dd>Ariary · MGA</dd></div>
-          <div><dt>État du projet</dt><dd>Synchronisation · Phase 5</dd></div>
+          <div><dt>État du projet</dt><dd>Application installable · Phase 6</dd></div>
         </dl>
       </section>
     </>

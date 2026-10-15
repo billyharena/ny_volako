@@ -12,6 +12,7 @@ import { FinanceContext } from './context'
 import { BudgetAlerts } from './Alerts'
 import { SyncEngine, type SyncState } from '../../sync/engine'
 import { authSessionId, createTransport } from '../../sync/transport'
+import { registerUpdateParticipant } from '../../pwa/update-gate'
 
 const config = readEnvironment(import.meta.env)
 
@@ -48,6 +49,14 @@ function LocalWorkspace({ userId, sessionId, client }: { userId: string; session
     const controller = new AbortController()
     let active = true
     const engine = new SyncEngine(ledger, createTransport(client, db.source, config.status === 'ready' ? config.publicKey : '', userId, sessionId), value => { if (active) setSync(value) })
+    const unregisterUpdate = registerUpdateParticipant({
+      pause: async () => {
+        await engine.pause()
+        // Queued after all preceding writes, across every store; no network in this transaction.
+        await db.transaction('rw', db.tables, () => undefined)
+      },
+      resume: () => engine.resume(),
+    })
     let subscription: { unsubscribe(): void } | undefined
     void initializeLocalAccount(db, client, controller.signal).then(() => {
       if (!active) return
@@ -57,7 +66,7 @@ function LocalWorkspace({ userId, sessionId, client }: { userId: string; session
       })
       engine.start()
     }).catch(() => { if (active) setError('Impossible d’ouvrir le carnet local. Pour une première ouverture, vérifiez votre connexion et réessayez. Les données existantes sont conservées.') })
-    return () => { active = false; controller.abort(); subscription?.unsubscribe(); ledger.deactivate(); void engine.stop().finally(() => db.close()) }
+    return () => { active = false; unregisterUpdate(); controller.abort(); subscription?.unsubscribe(); ledger.deactivate(); void engine.stop().finally(() => db.close()) }
   }, [userId, sessionId, client, attempt])
   if (error) return <section className="settings-card"><h1>Carnet indisponible</h1><p role="alert">{error}</p><button className="primary-link" onClick={() => { setError(''); setState(null); setAttempt(n => n + 1) }}>Réessayer</button><p><Link to="/configuration">Vérifier la configuration</Link></p></section>
   if (!state) return <p role="status">Préparation du carnet local…</p>
