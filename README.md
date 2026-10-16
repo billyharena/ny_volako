@@ -2,7 +2,7 @@
 
 Application personnelle de suivi des dépenses en français, utilisable hors ligne sur ordinateur et mobile après une première connexion.
 
-**État : phase 7 — application déployée, validation finale en cours.** [Ouvrir Ny Volako](https://ny-volako-gamma.vercel.app). Dépenses, historique, catégories, budgets et tableau de bord utilisent IndexedDB. La file persistante se synchronise avec Supabase, avec reçus idempotents, réessais, protection entre onglets et résolution explicite des conflits. Le build comprend le cache hors ligne, le manifeste et les commandes d’installation et de mise à jour. Export et restauration des opérations sont disponibles. Les redirections Auth et l’envoi réel des emails restent à confirmer ; voir le [guide d’exploitation](docs/EXPLOITATION.md). Aucune donnée financière de démonstration.
+**État : phase 7 terminée — application déployée et validée.** [Ouvrir Ny Volako](https://ny-volako-gamma.vercel.app). Dépenses, historique, catégories, budgets et tableau de bord utilisent IndexedDB. La file persistante se synchronise avec Supabase, avec reçus idempotents, réessais, protection entre onglets et résolution explicite des conflits. Le build comprend le cache hors ligne, le manifeste et les commandes d’installation et de mise à jour. Export et restauration des opérations sont disponibles. Les tests locaux et GitHub Actions passent ; le propriétaire a confirmé l'inscription et la connexion réelles. Voir le [guide d’exploitation](docs/EXPLOITATION.md) pour les limites, notamment l'envoi d'emails à d'autres utilisateurs. Aucune donnée financière de démonstration.
 
 ## Prérequis
 
@@ -138,7 +138,7 @@ Dexie et Recharts sont utilisés par le carnet. Les écrans et graphiques sont c
 
 Vercel héberge le frontend Vite à https://ny-volako-gamma.vercel.app : commande `pnpm build`, sortie `dist`. `vercel.json` configure les routes SPA et le cache HTTP. Le projet est relié à GitHub et les pushes sur `main` déclenchent la production. Les paramètres publics Supabase sont configurés uniquement pour Production. Les aperçus nécessitent une base de test séparée pour activer Auth ; ils n’utilisent pas automatiquement la production.
 
-Supabase hébergé : projet `ny_volako` (`yeesrgvjelezjwryxvka`). Les deux migrations sont appliquées, RLS est activé et forcé sur les cinq tables métier. Les tests SQL ont été vérifiés localement et sur le serveur dans une transaction annulée. Les réglages de redirection et les emails Auth restent à confirmer. Ne jamais exécuter de réinitialisation sur le projet hébergé. Consulter le [guide d’exploitation](docs/EXPLOITATION.md) pour la configuration, les mises à jour et les vérifications.
+Supabase hébergé : projet `ny_volako` (`yeesrgvjelezjwryxvka`). Les deux migrations sont appliquées, RLS est activé et forcé sur les cinq tables métier. Les tests SQL ont été vérifiés localement et sur le serveur dans une transaction annulée. Le propriétaire a confirmé les redirections, la réception de l'email et la connexion. Ne jamais exécuter de réinitialisation sur le projet hébergé. Consulter le [guide d’exploitation](docs/EXPLOITATION.md) pour la configuration, les mises à jour et les vérifications.
 
 ## Documents
 
@@ -148,5 +148,6 @@ Supabase hébergé : projet `ny_volako` (`yeesrgvjelezjwryxvka`). Les deux migra
 - [Fonctionnalités principales et vérifications](docs/PHASE-4-FONCTIONNALITES.md)
 - [Synchronisation et reprise](docs/PHASE-5-SYNCHRONISATION.md)
 - [PWA et interface](docs/PHASE-6-PWA.md)
+- [Validation et déploiement](docs/PHASE-7-DEPLOIEMENT.md)
 - [Exploitation et déploiement](docs/EXPLOITATION.md)
 - [Contrat RPC](docs/SYNCHRONISATION.md)
