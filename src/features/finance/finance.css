@@ -49,6 +49,10 @@
 .budget-alert { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: #fff2d4; border: 1px solid #dfc384; padding: 16px; border-radius: 12px; margin-bottom: 16px; font-size: 13px; }
 .budget-alert p { font-size: 12px; margin: 7px 0 0; }
 .pending-warning { border-left: 3px solid #c59832; padding-left: 12px; }
+.import-table { overflow-x: auto; margin-block: 20px; }
+.import-table table { border-collapse: collapse; width: 100%; text-align: left; font-size: 13px; }
+.import-table th, .import-table td { padding: 12px; border-bottom: 1px solid #dfe5d9; min-width: 85px; max-width: 300px; overflow-wrap: anywhere; }
+.import-table input { width: 22px; height: 22px; }
 @media (max-width: 760px) {
   .sidebar nav { gap: 2px; padding-inline: 8px; }
   .sidebar nav a { flex-direction: column; gap: 4px; padding: 7px 3px; font-size: 10px; }

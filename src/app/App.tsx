@@ -12,6 +12,7 @@ const PrivateWorkspace = lazy(() => import('../features/finance/PrivateWorkspace
 const Dashboard = lazy(() => import('../features/finance/Dashboard').then(module => ({ default: module.Dashboard })))
 const ExpenseEditor = lazy(() => import('../features/finance/Expenses').then(module => ({ default: module.ExpenseEditor })))
 const ExpenseHistory = lazy(() => import('../features/finance/Expenses').then(module => ({ default: module.ExpenseHistory })))
+const ExpenseImport = lazy(() => import('../features/finance/ExpenseImport').then(module => ({ default: module.ExpenseImport })))
 const Categories = lazy(() => import('../features/finance/Categories').then(module => ({ default: module.Categories })))
 const Budgets = lazy(() => import('../features/finance/Budgets').then(module => ({ default: module.Budgets })))
 const Synchronization = lazy(() => import('../features/finance/Synchronization').then(module => ({ default: module.Synchronization })))
@@ -60,6 +61,7 @@ export function App() {
               <Route path="/tableau-de-bord" element={<Dashboard />} />
               <Route path="/depenses" element={<ExpenseHistory />} />
               <Route path="/depenses/nouvelle" element={<ExpenseEditor />} />
+              <Route path="/depenses/importer" element={<ExpenseImport />} />
               <Route path="/depenses/:id" element={<ExpenseEditor />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/budgets" element={<Budgets />} />

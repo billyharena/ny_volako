@@ -16,6 +16,35 @@ beforeEach(async () => {
 afterEach(async () => { vi.restoreAllMocks(); ledger.deactivate(); await db.delete() })
 
 describe('transactions du carnet', () => {
+  it('importe atomiquement, crée les catégories avant les dépenses et évite les réimports', async () => {
+    const entries = [input, input, { ...input, motif: 'Bus', category_id: 'new:mobility' }].map(input => ({ input, allowDuplicate: false }))
+    expect(await ledger.importExpenses(entries, { 'new:mobility': 'Mobility' })).toEqual({ imported: 2, skipped: 1 })
+    expect(await ledger.importExpenses(entries, { 'new:mobility': 'Mobility' })).toEqual({ imported: 0, skipped: 3 })
+    expect(await db.expenses.count()).toBe(2)
+    expect(await db.categories.count()).toBe(2)
+    expect((await db.queue.orderBy('sequence').toArray()).map(op => op.entity)).toEqual(['expenses', 'categories', 'expenses'])
+    expect(await ledger.importExpenses([{ input, allowDuplicate: true }], {})).toEqual({ imported: 1, skipped: 0 })
+  })
+  it('annule tout le lot et ses nouvelles catégories si une écriture échoue', async () => {
+    const add = db.queue.add.bind(db.queue)
+    let count = 0
+    vi.spyOn(db.queue, 'add').mockImplementation((...args) => {
+      if (++count === 3) throw new Error('Quota dépassé')
+      return add(...args)
+    })
+    await expect(ledger.importExpenses([input, { ...input, category_id: 'new:data', motif: 'Internet' }].map(input => ({ input, allowDuplicate: false })), { 'new:data': 'Data' })).rejects.toThrow('Quota')
+    expect(await db.expenses.count()).toBe(0)
+    expect(await db.categories.count()).toBe(1)
+    expect(await db.queue.count()).toBe(0)
+  })
+  it('revérifie les doublons dans une transaction et refuse les catégories archivées', async () => {
+    const entries = [{ input, allowDuplicate: false }]
+    const results = await Promise.all([ledger.importExpenses(entries, {}), ledger.importExpenses(entries, {})])
+    expect(results.reduce((sum, result) => sum + result.imported, 0)).toBe(1)
+    await db.categories.update('category-a', { is_active: false })
+    await expect(ledger.importExpenses(entries, {})).rejects.toThrow('indisponible')
+    await expect(ledger.importExpenses([{ input: { ...input, category_id: 'new:food' }, allowDuplicate: false }], { 'new:food': 'Alimentation' })).rejects.toThrow('archivée')
+  })
   it('gèle les nouvelles écritures pendant une mise à jour et reprend après annulation', async () => {
     await ledger.saveExpense(input)
     const before = await db.queue.toArray()

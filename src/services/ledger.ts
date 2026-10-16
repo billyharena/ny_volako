@@ -1,4 +1,5 @@
 import type { Json } from '../data/remote/database.types'
+import { categoryKey, expenseKey, type ImportEntry } from '../domain/expense-import'
 import { assertNotUpdating } from '../pwa/update-gate'
 import { AccountDatabase, type Operation } from '../data/local/database'
 import { budgetState, sumExpenses, validateExpense, validateBudget, ValidationError, type BudgetInput, type Category, type Entity, type ExpenseInput, type RecordBase, type Snapshot } from '../domain/finance'
@@ -70,6 +71,43 @@ export class Ledger {
       await this.enqueue('expenses', row, 'delete', {}, old)
       await this.alertsFor([row.expense_date.slice(0, 7)])
       this.guard()
+    })
+  }
+  async importExpenses(entries: ImportEntry[], newCategories: Record<string, string>) {
+    if (!entries.length || entries.length > 5000) throw new Error('Sélectionnez de 1 à 5 000 dépenses.')
+    const validated = entries.map(entry => ({ ...entry, input: validateExpense(entry.input) }))
+    return this.db.transaction('rw', this.db.tables, async () => {
+      await this.writable()
+      const categories = await this.db.categories.toArray()
+      const resolved = new Map<string, string>()
+      const seen = new Set((await this.db.expenses.toArray()).filter(row => !row.deleted_at).map(expenseKey))
+      const months = new Set<string>()
+      let imported = 0, skipped = 0
+      for (const entry of validated) {
+        const sourceId = entry.input.category_id
+        let categoryId = resolved.get(sourceId) ?? sourceId
+        if (!resolved.has(sourceId) && Object.hasOwn(newCategories, sourceId)) {
+          const name = newCategories[sourceId]!
+          const matching = categories.find(category => categoryKey(category.name) === categoryKey(name))
+          if (matching && !matching.is_active) throw new Error(`La catégorie « ${name} » est archivée. Réactivez-la ou choisissez une autre catégorie.`)
+          const category = matching ?? await this.saveCategory(name, true)
+          if (!matching) categories.push(category)
+          categoryId = category.id; resolved.set(sourceId, categoryId)
+        }
+        const category = categories.find(category => category.id === categoryId && category.user_id === this.db.userId && category.is_active)
+        if (!category) throw new Error('Une catégorie est devenue indisponible. Revérifiez les associations.')
+        const value = { ...entry.input, category_id: categoryId }
+        const key = expenseKey(value)
+        if (seen.has(key) && !entry.allowDuplicate) { skipped++; continue }
+        const row = { ...this.base(), ...value, deleted_at: null }
+        await this.db.expenses.add(row)
+        const payload: ExpenseInput = { expense_date: value.expense_date, motif: value.motif, category_id: categoryId, unit_price: value.unit_price, quantity: value.quantity, extra_fee: value.extra_fee }
+        await this.enqueue('expenses', row, 'create', payload)
+        seen.add(key); months.add(value.expense_date.slice(0, 7)); imported++
+      }
+      await this.alertsFor([...months])
+      this.guard()
+      return { imported, skipped }
     })
   }
   async saveCategory(name: string, isActive: boolean, old?: Category) {

@@ -142,6 +142,7 @@ Supabase hébergé : projet `ny_volako` (`yeesrgvjelezjwryxvka`). Les deux migra
 
 ## Documents
 
+- [Importer les dépenses d’un tableur (CSV)](docs/IMPORT-CSV.md)
 - [Conception validée](docs/PHASE-1-CONCEPTION.md)
 - [Bilan de phase 2](docs/PHASE-2-INITIALISATION.md)
 - [Base et authentification](docs/PHASE-3-BASE-AUTH.md)

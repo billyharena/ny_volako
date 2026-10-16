@@ -18,6 +18,7 @@ export function ExpenseHistory() {
   const names = new Map(data.categories.map(category => [category.id, category.name]))
   return <>
     <PageHeading title="Mes dépenses" description="Retrouvez vos achats, leur détail et leur total sur cet appareil." />
+    <Link className="secondary-button" to="/depenses/importer">Importer des dépenses</Link>
     {location.state?.saved && <p role="status" className="success-message">Enregistré sur cet appareil · en attente de synchronisation.</p>}
     {location.state?.deleted && <p role="status" className="success-message">Dépense supprimée sur cet appareil · en attente de synchronisation.</p>}
     <section className="panel filters" aria-label="Filtres des dépenses">
