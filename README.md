@@ -2,7 +2,7 @@
 
 Application personnelle de suivi des dépenses en français, utilisable hors ligne sur ordinateur et mobile après une première connexion.
 
-**État : phase 6 — PWA et interface.** Dépenses, historique, catégories, budgets et tableau de bord utilisent IndexedDB. La file persistante se synchronise avec Supabase, avec reçus idempotents, réessais, protection entre onglets et résolution explicite des conflits. Le build comprend maintenant le cache hors ligne, le manifeste et les commandes d’installation et de mise à jour. Export et restauration des opérations sont disponibles. Aucune donnée financière de démonstration.
+**État : phase 7 — application déployée, validation finale en cours.** [Ouvrir Ny Volako](https://ny-volako-gamma.vercel.app). Dépenses, historique, catégories, budgets et tableau de bord utilisent IndexedDB. La file persistante se synchronise avec Supabase, avec reçus idempotents, réessais, protection entre onglets et résolution explicite des conflits. Le build comprend le cache hors ligne, le manifeste et les commandes d’installation et de mise à jour. Export et restauration des opérations sont disponibles. Les redirections Auth et l’envoi réel des emails restent à confirmer ; voir le [guide d’exploitation](docs/EXPLOITATION.md). Aucune donnée financière de démonstration.
 
 ## Prérequis
 
@@ -134,11 +134,11 @@ Une restauration exige une file actuelle vide et un fichier du même compte/serv
 
 Dexie et Recharts sont utilisés par le carnet. Les écrans et graphiques sont chargés à la demande et restent précachés pour le mode hors ligne. Le client Supabase est actif lorsque les paramètres publics sont renseignés.
 
-## Déploiement prévu
+## Déploiement
 
-Vercel hébergera le frontend Vite : commande `pnpm build`, sortie `dist`. La configuration SPA, la liaison GitHub/Vercel, les variables distantes et la publication seront réalisées en phase 7. Le démarrage local de phase 2 ne dépend pas d’une liaison Vercel ; cela respecte le séquencement du prompt validé.
+Vercel héberge le frontend Vite à https://ny-volako-gamma.vercel.app : commande `pnpm build`, sortie `dist`. `vercel.json` configure les routes SPA et le cache HTTP. Le projet est relié à GitHub et les pushes sur `main` déclenchent la production. Les paramètres publics Supabase sont configurés uniquement pour Production. Les aperçus nécessitent une base de test séparée pour activer Auth ; ils n’utilisent pas automatiquement la production.
 
-Supabase hébergé existant : projet `ny_volako`. Les migrations de phase 3 sont validées sur l’instance locale ; leur application à la cible hébergée et ses réglages Auth seront réalisés avec le déploiement de phase 7. Ne jamais exécuter de réinitialisation sur le projet hébergé.
+Supabase hébergé : projet `ny_volako` (`yeesrgvjelezjwryxvka`). Les deux migrations sont appliquées, RLS est activé et forcé sur les cinq tables métier. Les tests SQL ont été vérifiés localement et sur le serveur dans une transaction annulée. Les réglages de redirection et les emails Auth restent à confirmer. Ne jamais exécuter de réinitialisation sur le projet hébergé. Consulter le [guide d’exploitation](docs/EXPLOITATION.md) pour la configuration, les mises à jour et les vérifications.
 
 ## Documents
 
@@ -148,4 +148,5 @@ Supabase hébergé existant : projet `ny_volako`. Les migrations de phase 3 sont
 - [Fonctionnalités principales et vérifications](docs/PHASE-4-FONCTIONNALITES.md)
 - [Synchronisation et reprise](docs/PHASE-5-SYNCHRONISATION.md)
 - [PWA et interface](docs/PHASE-6-PWA.md)
+- [Exploitation et déploiement](docs/EXPLOITATION.md)
 - [Contrat RPC](docs/SYNCHRONISATION.md)

@@ -70,6 +70,8 @@ test.describe('Auth et RPC sur Supabase local', () => {
     await page.goto('/compte')
     await expect(page.getByRole('heading', { name: 'Heureux de vous retrouver.' })).toBeVisible()
     await page.getByRole('link', { name: 'Mot de passe oublié ?' }).click()
+    // Le champ email existe aussi sur la page précédente : attendre la nouvelle route.
+    await expect(page.getByRole('heading', { name: 'Retrouver votre accès.' })).toBeVisible()
     await page.getByLabel('Adresse email').fill(email)
     await page.getByRole('button', { name: 'Recevoir un lien' }).click()
     await expect(page.getByRole('status')).toContainText('Si un compte correspond')
@@ -81,6 +83,7 @@ test.describe('Auth et RPC sur Supabase local', () => {
     await page.getByRole('button', { name: 'Enregistrer le mot de passe' }).click()
     await expect(page.getByRole('heading', { name: 'Mon compte', exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Se déconnecter de cet appareil' }).click()
+    await expect(page.getByRole('heading', { name: 'Heureux de vous retrouver.' })).toBeVisible()
     await page.getByLabel('Adresse email').fill(email)
     await page.getByLabel('Mot de passe', { exact: true }).fill(replacement)
     await page.getByRole('button', { name: 'Se connecter' }).click()

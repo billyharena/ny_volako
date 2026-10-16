@@ -55,7 +55,17 @@ test.describe('synchronisation réelle', () => {
       await edit(page, 'Choix appareil A', 'Edition contre suppression')
       await second.getByRole('link', { name: 'Choix appareil A', exact: true }).click()
       await second.getByRole('button', { name: 'Supprimer cette dépense' }).click()
-      await second.getByRole('button', { name: 'Confirmer la suppression' }).click(); await settled(second)
+      const deletionConfirmed = second.waitForResponse(response => response.url().endsWith('/rest/v1/rpc/apply_change')
+        && response.request().postDataJSON()?.p_kind === 'delete')
+      await second.getByRole('button', { name: 'Confirmer la suppression' }).click()
+      // La file peut encore afficher zéro avant la fin de l'écriture IndexedDB.
+      // Attendre d'abord la confirmation métier, puis son accusé serveur.
+      await expect(second.getByText('Dépense supprimée sur cet appareil · en attente de synchronisation.', { exact: true })).toBeVisible()
+      await expect(second.getByRole('link', { name: 'Choix appareil A', exact: true })).toHaveCount(0)
+      const deletionResponse = await deletionConfirmed
+      expect(deletionResponse.ok()).toBe(true)
+      expect((await deletionResponse.json()).status).toBe('applied')
+      await settled(second)
       await context.setOffline(false); await sync(page)
       await expect(page.getByRole('heading', { name: 'Conflit à résoudre' })).toBeVisible()
       await expect(page.getByRole('button', { name: 'Proposer ma version locale' })).toHaveCount(0)
